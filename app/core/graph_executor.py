@@ -11,6 +11,7 @@ from app.core.agent_engine import agent_engine
 class GraphExecutor:
     def __init__(self):
         self.graphs: Dict[str, DecisionGraph] = {}
+        self.manual_override_enabled = False
         self._init_default_graphs()
 
     def _init_default_graphs(self):
@@ -147,28 +148,44 @@ class GraphExecutor:
                 act_params = context.get("action_params") or node.action_params or {}
                 action_id = f"act_{uuid.uuid4().hex[:8]}"
 
-                # Idempotency check: record and execute action
-                action_dispatched = db.record_action(
-                    action_id=action_id,
-                    idempotency_key=context["idempotency_key"],
-                    action_type=act_type,
-                    params=act_params,
-                    offline=is_offline,
-                    result={"status": "EXECUTED", "action_id": action_id}
-                )
+                if self.manual_override_enabled:
+                    # User-feedback feature: Human Operator Interlock suppresses automatic actuator dispatch
+                    action_record = {
+                        "action_id": action_id,
+                        "action_type": act_type,
+                        "params": act_params,
+                        "offline": is_offline,
+                        "dispatched": False,
+                        "override_status": "HELD_FOR_OPERATOR_CLEARANCE",
+                        "timestamp": time.time()
+                    }
+                    state.actions_dispatched.append(action_record)
+                    step.outputs = action_record
+                    step.reasoning = f"[OPERATOR SAFETY INTERLOCK] Autonomous dispatch paused. Action '{act_type}' held pending manual human confirmation."
+                    current_node_id = node.next_nodes[0] if node.next_nodes else None
+                else:
+                    # Idempotency check: record and execute action
+                    action_dispatched = db.record_action(
+                        action_id=action_id,
+                        idempotency_key=context["idempotency_key"],
+                        action_type=act_type,
+                        params=act_params,
+                        offline=is_offline,
+                        result={"status": "EXECUTED", "action_id": action_id}
+                    )
 
-                action_record = {
-                    "action_id": action_id,
-                    "action_type": act_type,
-                    "params": act_params,
-                    "offline": is_offline,
-                    "dispatched": action_dispatched,
-                    "timestamp": time.time()
-                }
-                state.actions_dispatched.append(action_record)
-                step.outputs = action_record
-                step.reasoning = f"Dispatched action '{act_type}' (Idempotency Safe: {action_dispatched})"
-                current_node_id = node.next_nodes[0] if node.next_nodes else None
+                    action_record = {
+                        "action_id": action_id,
+                        "action_type": act_type,
+                        "params": act_params,
+                        "offline": is_offline,
+                        "dispatched": action_dispatched,
+                        "timestamp": time.time()
+                    }
+                    state.actions_dispatched.append(action_record)
+                    step.outputs = action_record
+                    step.reasoning = f"Dispatched action '{act_type}' (Idempotency Safe: {action_dispatched})"
+                    current_node_id = node.next_nodes[0] if node.next_nodes else None
 
             elif node.type == NodeType.AGGREGATOR:
                 step.outputs = {"status": "GRAPH_COMPLETED", "actions_count": len(state.actions_dispatched)}

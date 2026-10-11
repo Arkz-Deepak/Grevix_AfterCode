@@ -139,7 +139,7 @@ async def run_resilience_proof():
 
     total_duration_ms = round((time.time() - benchmark_start) * 1000, 2)
 
-    return {
+    result_payload = {
         "benchmark_id": f"proof_bench_{uuid.uuid4().hex[:8]}",
         "timestamp": time.time(),
         "total_duration_ms": total_duration_ms,
@@ -153,3 +153,35 @@ async def run_resilience_proof():
         },
         "phases": steps_log
     }
+
+    # Store in memory for immediate compliance export download
+    global _latest_proof_cache
+    _latest_proof_cache = result_payload
+
+    return result_payload
+
+_latest_proof_cache = None
+
+@router.get("/export")
+async def export_proof_report():
+    """
+    User-Feedback Capability:
+    Exports the latest compliance verification report as a downloadable JSON audit document.
+    """
+    import json
+    from starlette.responses import Response
+
+    global _latest_proof_cache
+    report = _latest_proof_cache
+    if not report:
+        # Run simulation once if not yet run
+        report = await run_resilience_proof()
+
+    json_str = json.dumps(report, indent=2)
+    return Response(
+        content=json_str,
+        media_type="application/json",
+        headers={
+            "Content-Disposition": f"attachment; filename=AegisFlow_Resilience_Audit_{report['benchmark_id']}.json"
+        }
+    )

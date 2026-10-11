@@ -58,9 +58,81 @@ async function fetchStatus() {
 
     updateNetworkUI(data.network);
     updateStatsUI(data.stats);
+    updateInterlockUI(data.manual_override_enabled);
   } catch (err) {
     // If backend is unreachable (simulating client-side disconnect)
     console.warn("Connection poll failed:", err);
+  }
+}
+
+function updateInterlockUI(enabled) {
+  const btn = document.getElementById("btnSafetyInterlock");
+  const txt = document.getElementById("interlockText");
+  if (!btn || !txt) return;
+  if (enabled) {
+    btn.style.background = "rgba(244, 63, 94, 0.2)";
+    btn.style.borderColor = "var(--rose)";
+    btn.style.color = "var(--rose)";
+    txt.textContent = "SAFETY INTERLOCK: ACTIVE (HALTED)";
+  } else {
+    btn.style.background = "";
+    btn.style.borderColor = "rgba(245, 158, 11, 0.4)";
+    btn.style.color = "var(--text-main)";
+    txt.textContent = "SAFETY INTERLOCK: OFF";
+  }
+}
+
+async function toggleSafetyInterlock() {
+  try {
+    const isCurrentlyActive = document.getElementById("interlockText").textContent.includes("ACTIVE");
+    const nextState = !isCurrentlyActive;
+    const res = await fetch("/api/resilience/override", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled: nextState })
+    });
+    const data = await res.json();
+    updateInterlockUI(data.manual_override_enabled);
+    logToTerminal(nextState ? "WARNING" : "SUCCESS", "OPERATOR_LOCKOUT", data.message);
+  } catch (err) {
+    logToTerminal("ERROR", "OPERATOR_LOCKOUT", `Failed to toggle interlock: ${err.message}`);
+  }
+}
+
+async function toggleOutboxInspector() {
+  const panel = document.getElementById("outboxInspectorPanel");
+  const content = document.getElementById("outboxInspectorContent");
+  if (!panel || !content) return;
+
+  if (panel.style.display === "block") {
+    panel.style.display = "none";
+    return;
+  }
+
+  panel.style.display = "block";
+  content.innerHTML = "Fetching staged outbox items...";
+
+  try {
+    const res = await fetch("/api/resilience/outbox");
+    const items = await res.json();
+    if (!items || items.length === 0) {
+      content.innerHTML = "<div style='color: var(--text-muted);'>Outbox is empty (all items reconciled).</div>";
+      return;
+    }
+
+    let html = "";
+    items.forEach(it => {
+      const statusColor = it.status === "ACKNOWLEDGED" ? "var(--emerald)" : "var(--amber)";
+      html += `<div style="border-bottom: 1px solid rgba(255,255,255,0.06); padding: 4px 0;">
+        <span style="color: ${statusColor}; font-weight: bold;">[${it.status}]</span> 
+        <strong>${it.item_type}:</strong> ${it.idempotency_key} 
+        <span style="color: #64748b;">(Attempts: ${it.attempts})</span><br>
+        <span style="color: #94a3b8; font-size: 0.68rem;">Event: ${it.payload.event_type || 'N/A'} | Sensor: ${it.payload.payload?.sensor_id || 'N/A'}</span>
+      </div>`;
+    });
+    content.innerHTML = html;
+  } catch (err) {
+    content.innerHTML = `<span style='color: var(--rose);'>Failed to load outbox: ${err.message}</span>`;
   }
 }
 

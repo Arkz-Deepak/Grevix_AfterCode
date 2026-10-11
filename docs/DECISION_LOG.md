@@ -47,3 +47,22 @@
 2. **Deterministic Edge Failsafe vs. Edge LLM Quantization:**
    - Running full local LLMs on resource-constrained field tablets can cause 5-10 second inference stalls.
    - AegisFlow pairs deterministic rule heuristics with structured reasoning for sub-5ms local safety execution.
+
+---
+
+### Phase 3: Pressure Test — Challenge Card 02 (16:30 - 00:00 IST)
+- **The Disruption Received:**
+  - *Challenge Card 02: Real-World Feedback Under Pressure*
+  - "Share what you're building with real users / developer communities, document honest critique, and adapt the software accordingly."
+- **Feedback Sourced & Architectural Evolutions:**
+  - **Decision 5: Operator Safety Interlock (Human-in-the-Loop Override)**
+    - *Feedback:* Peer engineers asked: *"What if the offline edge heuristic misdiagnoses sensor noise and closes a valve improperly? Can an operator halt autonomous execution?"*
+    - *Chosen approach:* Added `POST /api/resilience/override` and a UI safety lockout switch. Halts automatic actuator dispatches and flags them as `HELD_FOR_OPERATOR_CLEARANCE` while preserving telemetry buffering.
+  - **Decision 6: Verifiable Compliance Audit Export Engine**
+    - *Feedback:* *"How does a supervisor export proof of 0 data loss for regulatory audit without querying SQLite directly?"*
+    - *Chosen approach:* Built `GET /api/proof/export` generating signed JSON compliance documents with benchmark IDs, timestamps, and RPO/RTO metrics.
+  - **Decision 7: Outbox Queue Inspector Drawer**
+    - *Feedback:* *"Operators need to see what specific triggers are queued inside the outbox."*
+    - *Chosen approach:* Created `GET /api/resilience/outbox` and integrated an expandable inspector table in the web console.
+- **Proof Committed:**
+  - Documented in `/feedback/README.md` with screenshots and before-and-after code modifications.

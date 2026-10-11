@@ -26,7 +26,12 @@
         <span class="badge-tag">AFTERCODE: THE SHIFT</span>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button id="btnSafetyInterlock" class="btn-secondary" style="display: flex; align-items: center; gap: 6px; border-color: rgba(245, 158, 11, 0.4);" onclick="toggleSafetyInterlock()">
+          <i data-lucide="lock" style="width: 14px; height: 14px; color: var(--amber);"></i>
+          <span id="interlockText">SAFETY INTERLOCK: OFF</span>
+        </button>
+
         <div id="statusPill" class="status-pill status-online">
           <div class="status-dot"></div>
           <span id="statusText">ONLINE // LOW LATENCY</span>
@@ -120,6 +125,15 @@
               <div class="stat-label">Edge Executions</div>
               <div class="stat-value" id="valEdgeExecs" style="color: #a78bfa;">0</div>
             </div>
+          </div>
+
+          <button class="btn-secondary" style="width: 100%; margin-top: 12px; font-size: 0.78rem; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="toggleOutboxInspector()">
+            <i data-lucide="eye" style="width: 13px; height: 13px;"></i>
+            <span>INSPECT BUFFERED OUTBOX</span>
+          </button>
+
+          <div id="outboxInspectorPanel" style="display: none; margin-top: 10px; max-height: 180px; overflow-y: auto; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; font-family: var(--font-mono); font-size: 0.72rem;">
+            <div id="outboxInspectorContent">Loading outbox items...</div>
           </div>
 
           <div style="margin-top: 14px; font-size: 0.75rem; color: var(--text-muted);">
@@ -261,10 +275,16 @@
             Executes a 6-phase automated chaos benchmark proving zero data loss, offline autonomous execution, and idempotent reconciliation under complete network dropout.
           </p>
 
-          <button id="btnRunProof" class="btn-danger" style="margin-bottom: 14px;" onclick="runConcreteProof()">
-            <i data-lucide="zap" style="width: 18px; height: 18px;"></i>
-            <span>RUN 6-PHASE PROOF TEST</span>
-          </button>
+          <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+            <button id="btnRunProof" class="btn-danger" style="flex: 1;" onclick="runConcreteProof()">
+              <i data-lucide="zap" style="width: 16px; height: 16px;"></i>
+              <span>RUN 6-PHASE PROOF</span>
+            </button>
+            <a href="/api/proof/export" download class="btn-secondary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 14px; font-size: 0.8rem; border-color: rgba(0, 242, 254, 0.4); color: var(--cyan);" title="Export Compliance Audit Receipt (JSON)">
+              <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+              <span>EXPORT AUDIT</span>
+            </a>
+          </div>
 
           <!-- Proof Metrics Results -->
           <div id="proofResultsBox" style="display: none;">
