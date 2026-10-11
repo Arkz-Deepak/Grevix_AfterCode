@@ -6,7 +6,7 @@ DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
 DB_PATH = str(DATA_DIR / "aegisflow.db")
-DEFAULT_PORT = 8000
+DEFAULT_PORT = int(os.getenv("PORT", 8000))
 HOST = "0.0.0.0"
 
 # Agent & Resilience settings
