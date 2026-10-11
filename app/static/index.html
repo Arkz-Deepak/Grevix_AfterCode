@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AegisFlow // Resilient Agentic Decision Orchestrator</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header>
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <i data-lucide="shield-alert" style="width: 22px; height: 22px;"></i>
+        </div>
+        <div class="brand-text">
+          <h1>AEGISFLOW</h1>
+          <span>NETWORK-DROPOUT RESILIENT AGENTIC ORCHESTRATOR</span>
+        </div>
+        <span class="badge-tag">AFTERCODE: THE SHIFT</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div id="statusPill" class="status-pill status-online">
+          <div class="status-dot"></div>
+          <span id="statusText">ONLINE // LOW LATENCY</span>
+        </div>
+
+        <button id="btnSyncNow" class="btn-secondary" style="display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i>
+          <span>RECONCILE OUTBOX</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid Content -->
+  <main class="main-content">
+
+    <!-- Column 1: Network Chaos & Outbox Store-and-Forward Monitor -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      
+      <!-- Network Chaos Controller -->
+      <section class="glass-panel">
+        <div class="card-header">
+          <div class="card-title">
+            <i data-lucide="radio" style="color: var(--cyan); width: 18px; height: 18px;"></i>
+            <span>Network Uplink Simulator</span>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);" id="latencyIndicator">20ms</span>
+        </div>
+        <div class="card-body">
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+            Simulate real-world conditions for a remote field operations manager experiencing severe network dropouts.
+          </p>
+
+          <div class="chaos-grid">
+            <button class="chaos-btn active" id="btnModeOnline" onclick="setChaosMode('ONLINE')">
+              <strong>1. Online</strong><br>
+              <span style="font-size: 0.7rem; color: var(--text-muted);">20ms, 0% Drop</span>
+            </button>
+            <button class="chaos-btn" id="btnModeDegraded" onclick="setChaosMode('DEGRADED')">
+              <strong>2. Degraded 3G</strong><br>
+              <span style="font-size: 0.7rem; color: var(--text-muted);">650ms, 45% Loss</span>
+            </button>
+            <button class="chaos-btn" id="btnModeBlackout" onclick="setChaosMode('BLACKOUT')">
+              <strong>3. Blackout</strong><br>
+              <span style="font-size: 0.7rem; color: var(--text-muted);">0 Mbps, Severed</span>
+            </button>
+            <button class="chaos-btn" id="btnModeFlapping" onclick="setChaosMode('FLAPPING')">
+              <strong>4. Flapping</strong><br>
+              <span style="font-size: 0.7rem; color: var(--text-muted);">Drops every 5s</span>
+            </button>
+          </div>
+
+          <div class="stat-box" style="margin-bottom: 0;">
+            <div class="stat-label">Active Link Diagnostics</div>
+            <div id="linkDesc" style="font-size: 0.85rem; font-family: var(--font-mono); color: var(--cyan);">
+              Broadband Fibre Uplink // Operational
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Store-and-Forward Outbox Monitor -->
+      <section class="glass-panel">
+        <div class="card-header">
+          <div class="card-title">
+            <i data-lucide="hard-drive-download" style="color: var(--amber); width: 18px; height: 18px;"></i>
+            <span>Local WAL Store-and-Forward</span>
+          </div>
+          <span class="badge-tag" style="background: rgba(245, 158, 11, 0.1); color: var(--amber); border-color: rgba(245, 158, 11, 0.3);">
+            SQLite WAL
+          </span>
+        </div>
+        <div class="card-body">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div class="stat-box" style="margin-bottom: 0;">
+              <div class="stat-label">Buffered Outbox</div>
+              <div class="stat-value" id="valPendingOutbox" style="color: var(--amber);">0</div>
+            </div>
+            <div class="stat-box" style="margin-bottom: 0;">
+              <div class="stat-label">Reconciled</div>
+              <div class="stat-value" id="valReconciled" style="color: var(--emerald);">0</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="stat-box" style="margin-bottom: 0;">
+              <div class="stat-label">Duplicates Blocked</div>
+              <div class="stat-value" id="valDeduplicated" style="color: var(--cyan);">0</div>
+            </div>
+            <div class="stat-box" style="margin-bottom: 0;">
+              <div class="stat-label">Edge Executions</div>
+              <div class="stat-value" id="valEdgeExecs" style="color: #a78bfa;">0</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px; font-size: 0.75rem; color: var(--text-muted);">
+            <i data-lucide="check-circle" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; color: var(--emerald);"></i>
+            <span>At-least-once transport with exactly-once idempotency deduplication guarantee.</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Column 2: Decision Logic Graph Visualizer & Execution Trace -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      
+      <section class="glass-panel" style="flex: 1;">
+        <div class="card-header">
+          <div class="card-title">
+            <i data-lucide="git-branch" style="color: var(--cyan); width: 18px; height: 18px;"></i>
+            <span>Remote Industrial Decision Logic Graph (DAG)</span>
+          </div>
+          <span id="activeModeBadge" class="badge-tag">ONLINE CLOUD AGENT</span>
+        </div>
+        <div class="card-body">
+          
+          <!-- Visual DAG Nodes -->
+          <div class="dag-container">
+            
+            <div class="dag-node" id="node-node_trigger">
+              <div class="node-title-row">
+                <span class="node-title">1. Trigger Ingestion Node</span>
+                <span class="node-type-badge">TRIGGER</span>
+              </div>
+              <p class="node-desc">Accepts telemetry / manual ops trigger with cryptographic HMAC & idempotency key.</p>
+            </div>
+
+            <div class="dag-node" id="node-node_filter">
+              <div class="node-title-row">
+                <span class="node-title">2. Operational Envelope Evaluator</span>
+                <span class="node-type-badge">CONDITION</span>
+              </div>
+              <p class="node-desc">Tests condition <code>reading >= threshold (80.0 psi)</code>.</p>
+            </div>
+
+            <div class="dag-node" id="node-node_agent_assessor">
+              <div class="node-title-row">
+                <span class="node-title">3. Agentic Risk Reasoning Engine</span>
+                <span class="node-type-badge">AGENT_DECISION</span>
+              </div>
+              <p class="node-desc">Dual-Mode: Cloud LLM Synthesis (Online) vs Edge Autonomous Rule Failsafe (Offline).</p>
+              
+              <div id="cotDisplay" class="cot-box" style="display: none;">
+                <strong>Reasoning Trace:</strong><br>
+                <span id="cotText">Awaiting execution...</span>
+              </div>
+            </div>
+
+            <div class="dag-node" id="node-node_action_dispatcher">
+              <div class="node-title-row">
+                <span class="node-title">4. Fail-Safe Action Dispatcher</span>
+                <span class="node-type-badge">ACTION</span>
+              </div>
+              <p class="node-desc">Dispatches actuators (Emergency Valve Cutoff, Drone Deploy, Team Alert) with idempotency lock.</p>
+            </div>
+
+            <div class="dag-node" id="node-node_audit">
+              <div class="node-title-row">
+                <span class="node-title">5. Audit & Reconcile Verification</span>
+                <span class="node-type-badge">AGGREGATOR</span>
+              </div>
+              <p class="node-desc">Commits state snapshot to SQLite WAL; issues proof receipt.</p>
+            </div>
+
+          </div>
+
+          <!-- Dispatched Action Card -->
+          <div id="lastActionCard" class="stat-box" style="display: none; border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.05);">
+            <div class="stat-label" style="color: var(--emerald);">Latest Dispatched Action</div>
+            <div id="lastActionTitle" style="font-weight: 700; font-size: 1rem; color: #fff;"></div>
+            <div id="lastActionDetails" style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;"></div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Column 3: Remote Operations Manager Controls & Live Proof Suite -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      
+      <!-- Operations Manager Trigger Console -->
+      <section class="glass-panel">
+        <div class="card-header">
+          <div class="card-title">
+            <i data-lucide="terminal" style="color: var(--cyan); width: 18px; height: 18px;"></i>
+            <span>Operations Manager Console</span>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Remote Field Tablet</span>
+        </div>
+        <div class="card-body">
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+            <label style="font-size: 0.8rem; color: var(--text-muted);">Telemetry Scenario Presets:</label>
+            
+            <button class="btn-secondary" style="text-align: left; padding: 10px;" onclick="loadPreset('NORMAL')">
+              <strong style="color: var(--emerald);">🟢 Nominal Baseline (45 psi)</strong><br>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Safe operating parameters</span>
+            </button>
+
+            <button class="btn-secondary" style="text-align: left; padding: 10px;" onclick="loadPreset('WARNING')">
+              <strong style="color: var(--amber);">🟡 Elevated Leak Risk (88 psi)</strong><br>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Triggers Drone Alpha-9 deploy</span>
+            </button>
+
+            <button class="btn-secondary" style="text-align: left; padding: 10px;" onclick="loadPreset('CRITICAL')">
+              <strong style="color: var(--rose);">🔴 Catastrophic Blowout (98.4 psi)</strong><br>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Triggers Emergency Valve Cutoff</span>
+            </button>
+          </div>
+
+          <button id="btnSendTrigger" class="btn-primary" onclick="sendActiveTrigger()">
+            <i data-lucide="send" style="width: 16px; height: 16px;"></i>
+            <span>DISPATCH TRIGGER TO ENGINE</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Concrete Resilience Proof Benchmark (Challenge Card 01 Hero) -->
+      <section class="glass-panel proof-card">
+        <div class="card-header" style="border-bottom-color: rgba(0, 242, 254, 0.3);">
+          <div class="card-title" style="color: var(--cyan);">
+            <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
+            <span>Challenge Card 01 Proof Suite</span>
+          </div>
+          <span class="badge-tag" style="background: rgba(0, 242, 254, 0.2); border-color: var(--cyan);">
+            CONCRETE PROOF
+          </span>
+        </div>
+        <div class="card-body">
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+            Executes a 6-phase automated chaos benchmark proving zero data loss, offline autonomous execution, and idempotent reconciliation under complete network dropout.
+          </p>
+
+          <button id="btnRunProof" class="btn-danger" style="margin-bottom: 14px;" onclick="runConcreteProof()">
+            <i data-lucide="zap" style="width: 18px; height: 18px;"></i>
+            <span>RUN 6-PHASE PROOF TEST</span>
+          </button>
+
+          <!-- Proof Metrics Results -->
+          <div id="proofResultsBox" style="display: none;">
+            <div class="metric-grid">
+              <div class="metric-tile">
+                <div class="num" id="proofDataLoss">0.0%</div>
+                <div class="lbl">Data Loss</div>
+              </div>
+              <div class="metric-tile">
+                <div class="num" id="proofRTO">14ms</div>
+                <div class="lbl">Recovery Time</div>
+              </div>
+              <div class="metric-tile">
+                <div class="num" id="proofDedupe">100%</div>
+                <div class="lbl">Idempotency</div>
+              </div>
+            </div>
+
+            <div id="proofPhasesList" style="font-family: var(--font-mono); font-size: 0.75rem; color: #cbd5e1; max-height: 180px; overflow-y: auto; background: rgba(0, 0, 0, 0.3); padding: 8px; border-radius: 6px;">
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Bottom Full-Width System Audit Log -->
+  <footer style="max-width: 1600px; margin: 0 auto 2rem auto; padding: 0 1.5rem;">
+    <section class="glass-panel">
+      <div class="card-header">
+        <div class="card-title">
+          <i data-lucide="list-ordered" style="color: var(--cyan); width: 18px; height: 18px;"></i>
+          <span>Immutable WAL System Audit & Telemetry Stream</span>
+        </div>
+        <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="clearLogWindow()">
+          CLEAR CONSOLE
+        </button>
+      </div>
+      <div class="card-body" style="padding: 0;">
+        <div class="terminal-window" id="terminalLog">
+          <div class="terminal-line"><span class="t-time">[00:00:00]</span> <span class="t-info">[SYSTEM]</span> AegisFlow Resilient Agentic Platform Initialized. Write-Ahead Logging active.</div>
+        </div>
+      </div>
+    </section>
+  </footer>
+
+  <script src="/static/app.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
