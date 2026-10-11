@@ -159,6 +159,7 @@ C:\Projects\Grevix_AfterCode\
 
 - **Project Name:** AegisFlow
 - **Core Pitch:** Resilient Distributed Agentic Workflow Orchestrator with Network Dropout Fault-Tolerance & Store-and-Forward Reconciler.
+- **Public GitHub Repository:** [https://github.com/Arkz-Deepak/Grevix_AfterCode](https://github.com/Arkz-Deepak/Grevix_AfterCode)
 - **Challenge Card 01 Evolution:** Adapted from a naive cloud-dependent agent to an edge-resilient local-first architecture with dual-mode reasoning, SQLite WAL outbox, and idempotent reconciliation.
 - **Tech Stack:** Python 3.13, FastAPI, SQLite WAL, Pydantic v2, Vanilla JS / CSS3, Lucide Icons.
 - **Build Log:** Available in [`docs/DECISION_LOG.md`](file:///C:/Projects/Grevix_AfterCode/docs/DECISION_LOG.md).
